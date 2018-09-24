@@ -13,7 +13,7 @@ $ npm run build
 $ npm run test
 ```
 ## Usage
-`````````
+```
 $ npm install mani-signal --save
 ```
 
