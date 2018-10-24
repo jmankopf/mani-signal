@@ -17,14 +17,20 @@ interface DetachRequest {
     next?: DetachRequest;
 }
 
+interface AddRequest {
+    binding: InternalBinding;
+    next?: DetachRequest;
+}
+
 export class Signal<T = never> {
     private head?: InternalBinding;
     private tail?: InternalBinding;
     private isDispatching = false;
     private detachAllFlag = false;
     private detachRequests?: DetachRequest;
+    private addRequests?: AddRequest;
 
-    add(callback: SignalCallback<T>, context?: any, once?:boolean): SignalBinding {
+    add(callback: SignalCallback<T>, context?: any, once?: boolean): SignalBinding {
         let item: InternalBinding = {
             call: once ? (param: T) => {
                 callback.call(context, param);
@@ -34,12 +40,14 @@ export class Signal<T = never> {
             }
         };
 
-        if (!this.tail) {
-            this.head = this.tail = item;
+        if (!this.isDispatching) {
+            this.doAdd(item);
         } else {
-            this.tail.next = item;
-            item.prev = this.tail;
-            this.tail = item;
+            const addRequest: AddRequest = {binding: item};
+            if (this.addRequests) {
+                addRequest.next = this.addRequests;
+            }
+            this.addRequests = addRequest;
         }
 
         return {
@@ -72,19 +80,15 @@ export class Signal<T = never> {
             this.detachAllFlag = false;
             this.detachAll();
             this.detachRequests = undefined;
-        } else if (this.detachRequests) {
-            this.processDetachRequests();
+        } else {
+            if (this.addRequests) {
+                this.processAddRequests();
+            }
+            if (this.detachRequests) {
+                this.processDetachRequests();
+            }
         }
 
-    }
-
-    private processDetachRequests() {
-        let current = this.detachRequests;
-        while (current) {
-            this.doRemoveBinding(current.binding);
-            current = current.next;
-        }
-        this.detachRequests = undefined;
     }
 
     detachAll() {
@@ -101,6 +105,34 @@ export class Signal<T = never> {
             temp.prev = temp.next = undefined;
         }
         this.head = this.tail = undefined;
+    }
+
+    private doAdd(binding: InternalBinding) {
+        if (!this.tail) {
+            this.head = this.tail = binding;
+        } else {
+            this.tail.next = binding;
+            binding.prev = this.tail;
+            this.tail = binding;
+        }
+    }
+
+    private processDetachRequests() {
+        let current = this.detachRequests;
+        while (current) {
+            this.doRemoveBinding(current.binding);
+            current = current.next;
+        }
+        this.detachRequests = undefined;
+    }
+
+    private processAddRequests() {
+        let current = this.addRequests;
+        while (current) {
+            this.doAdd(current.binding);
+            current = current.next;
+        }
+        this.addRequests = undefined;
     }
 
     private removeBinding(binding: InternalBinding) {

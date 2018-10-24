@@ -1,6 +1,6 @@
 {
   "name": "mani-signal",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A simple and very fast signal class.",
   "scripts": {
     "test": "jest",
@@ -16,21 +16,25 @@
     "signal",
     "typescript",
     "event dispatcher",
-    "typescript signals"
+    "typescript signals",
+    "fast",
+    "performant"
   ],
   "files": [
     "dist/**/*.js",
     "dist/**/*.d.ts"
   ],
+  "source": "./src/",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/JMankopf/mani-signal.git"
+    "url": "git+https://github.com/jmankopf/mani-signal.git"
   },
   "devDependencies": {
     "@types/jest": "^23.3.2",
     "jest": "^23.6.0",
-    "rimraf": "^2.6.2",
     "ts-jest": "^23.10.0",
+    "rimraf": "^2.6.2",
     "typescript": "^3.0.3"
-  }
+  },
+  "dependencies": {}
 }

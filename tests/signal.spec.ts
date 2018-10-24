@@ -168,7 +168,7 @@ describe('Signal tests', () => {
             timesCalled++;
         });
         signal.add(() => {
-            timesCalled ++;
+            timesCalled++;
         });
         signal.addOnce(() => {
             timesCalled++;
@@ -198,6 +198,7 @@ describe('Signal tests', () => {
                 this.timesCalled++;
             }
         }
+
         const t = new TestClass();
         t.signal.dispatch();
         t.signal.dispatch();
@@ -229,6 +230,38 @@ describe('Signal tests', () => {
 
         signal.dispatch();
         signal.dispatch();
-        expect(timesCalled).toBe(5);
+        expect(timesCalled).toBe(3);
+    });
+
+    it('should add and remove listener while dispatching', () => {
+        let timesCalled = 0;
+        const signal = new Signal();
+
+        signal.add(() => {
+            timesCalled++;
+            const binding = signal.add(() => {
+                timesCalled++;
+            });
+            binding.detach();
+        });
+
+        signal.dispatch();
+        signal.dispatch();
+        expect(timesCalled).toBe(2);
+    });
+
+    it('should throw error when detaching multiple times', () => {
+        const signal = new Signal();
+
+        let signalBinding = signal.add(() => {
+        });
+        let error = false;
+        try {
+            signalBinding.detach();
+            signalBinding.detach();
+        } catch (e) {
+            error = true;
+        }
+        expect(error).toBe(true);
     });
 });
