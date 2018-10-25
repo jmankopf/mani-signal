@@ -2,7 +2,7 @@ export interface SignalBinding {
     detach(): void;
 }
 
-export type SignalCallback<T> = (param: T) => void;
+export type SignalCallback<T = any> = (param: T) => void;
 
 interface InternalBinding {
     isDetached?: boolean;
@@ -22,7 +22,7 @@ interface AddRequest {
     next?: DetachRequest;
 }
 
-export class Signal<T = never> {
+export class Signal<T = any> {
     private head?: InternalBinding;
     private tail?: InternalBinding;
     private isDispatching = false;
