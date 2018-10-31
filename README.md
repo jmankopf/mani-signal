@@ -90,3 +90,29 @@ signal.detachAll();
 signal.dispatch();
 ```
 
+
+#### with context
+
+```typescript
+import {Signal} from 'mani-signal';
+
+class Foo {
+    value = 'Bar';
+    
+    constructor() {
+        const signal = new Signal();
+        
+        // pass the context as second parameter
+        signal.add(this.handler, this);
+        
+        signal.dispatch();
+    }
+    
+    handler() {
+        // accessing 'this' within a callback
+        console.log(this.value);
+    }
+    
+}
+```
+
