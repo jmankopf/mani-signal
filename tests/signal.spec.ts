@@ -236,18 +236,25 @@ describe('Signal tests', () => {
     it('should add and remove listener while dispatching', () => {
         let timesCalled = 0;
         const signal = new Signal();
-
+        let binding2: SignalBinding;
         signal.add(() => {
             timesCalled++;
-            const binding = signal.add(() => {
+            const binding1 = signal.add(() => {
                 timesCalled++;
             });
-            binding.detach();
+            binding2 = signal.add(() => {
+                timesCalled++;
+            });
+            signal.add(() => {
+                timesCalled++;
+            });
+            binding1.detach();
         });
 
         signal.dispatch();
+        binding2!.detach();
         signal.dispatch();
-        expect(timesCalled).toBe(2);
+        expect(timesCalled).toBe(3);
     });
 
     it('should throw error when detaching multiple times', () => {
