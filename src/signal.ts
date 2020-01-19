@@ -2,7 +2,7 @@ export interface SignalBinding {
     detach(): void;
 }
 
-export type SignalCallback<T = any> = (param: T) => void;
+export type SignalCallback<T=unknown> = (param: T) => void;
 
 interface InternalBinding {
     isDetached?: boolean;
@@ -22,7 +22,7 @@ interface AddRequest {
     next?: DetachRequest;
 }
 
-export class Signal<T = any> {
+export class Signal<T = unknown> {
     private head?: InternalBinding;
     private tail?: InternalBinding;
     private isDispatching = false;
@@ -30,7 +30,7 @@ export class Signal<T = any> {
     private detachRequests?: DetachRequest;
     private addRequests?: AddRequest;
 
-    add(callback: SignalCallback<T>, context?: any, once?: boolean): SignalBinding {
+    add(callback: SignalCallback<T>, context?: unknown, once?: boolean): SignalBinding {
         let item: InternalBinding = {
             call: once ? (param: T) => {
                 callback.call(context, param);
@@ -60,7 +60,7 @@ export class Signal<T = any> {
         };
     }
 
-    addOnce(callback: SignalCallback<T>, context?: any) {
+    addOnce(callback: SignalCallback<T>, context?: unknown) {
         return this.add(callback, context, true);
     }
 

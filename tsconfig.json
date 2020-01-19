@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "esnext",
+    "lib": ["es2015", "dom", "dom.iterable"],
+    "declaration": true,
+    "outDir": "./dist",
+    "allowJs": false,
+    "rootDir": "./src",
+    "removeComments": true,
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "downlevelIteration": false,
+    "strict": true
+  },
+  "include": [
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "tests",
+    "**/*.spec.ts"
+  ]
+}

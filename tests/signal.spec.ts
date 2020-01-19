@@ -271,4 +271,15 @@ describe('Signal tests', () => {
         }
         expect(error).toBe(true);
     });
+
 });
+
+const s = new Signal<string>();
+
+s.add(rec);
+
+s.dispatch('word');
+
+function rec(s: string) {
+
+}
