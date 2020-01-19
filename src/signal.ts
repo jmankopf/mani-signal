@@ -1,10 +1,13 @@
 export interface SignalBinding {
+    setActive(value: boolean): void;
+    isActive(): boolean;
     detach(): void;
 }
 
-export type SignalCallback<T=unknown> = (param: T) => void;
+export type SignalCallback<T = unknown> = (param: T) => void;
 
 interface InternalBinding {
+    active: boolean;
     isDetached?: boolean;
     next?: InternalBinding;
     prev?: InternalBinding;
@@ -21,7 +24,7 @@ interface AddRequest {
     binding: InternalBinding;
     next?: DetachRequest;
 }
-
+const EMPTY_CALL = () => {};
 export class Signal<T = unknown> {
     private head?: InternalBinding;
     private tail?: InternalBinding;
@@ -31,13 +34,17 @@ export class Signal<T = unknown> {
     private addRequests?: AddRequest;
 
     add(callback: SignalCallback<T>, context?: unknown, once?: boolean): SignalBinding {
+
+        const call = once ? (param: T) => {
+            callback.call(context, param);
+            this.removeBinding(item);
+        } : (param: T) => {
+            callback.call(context, param);
+        };
+
         let item: InternalBinding = {
-            call: once ? (param: T) => {
-                callback.call(context, param);
-                this.removeBinding(item);
-            } : (param: T) => {
-                callback.call(context, param);
-            }
+            active: true,
+            call
         };
 
         if (!this.isDispatching) {
@@ -51,6 +58,15 @@ export class Signal<T = unknown> {
         }
 
         return {
+            setActive: (active: boolean) => {
+                item.active = active;
+                if (active) {
+                    item.call = call;
+                } else {
+                    item.call = EMPTY_CALL;
+                }
+            },
+            isActive: () => item.active,
             detach: () => {
                 if (item.isDetached) {
                     throw Error('Binding already detached');

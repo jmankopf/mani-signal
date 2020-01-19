@@ -1,11 +1,16 @@
 {
   "compilerOptions": {
     "target": "esnext",
-    "module": "esnext",
-    "lib": ["es2015", "dom", "dom.iterable"],
+    "module": "commonjs",
+    "lib": [
+      "es2015",
+      "dom",
+      "dom.iterable"
+    ],
     "declaration": true,
     "outDir": "./dist",
     "allowJs": false,
+    "sourceMap": true,
     "rootDir": "./src",
     "removeComments": true,
     "moduleResolution": "node",

@@ -98,21 +98,35 @@ import {Signal} from 'mani-signal';
 
 class Foo {
     value = 'Bar';
-    
+
     constructor() {
         const signal = new Signal();
-        
+
         // pass the context as second parameter
         signal.add(this.handler, this);
-        
+
         signal.dispatch();
     }
-    
+
     handler() {
         // accessing 'this' within a callback
         console.log(this.value);
     }
-    
+
 }
 ```
+#### deactivate/activate binding
 
+```typescript
+import {Signal} from 'mani-signal';
+
+const signal = new Signal();
+
+const binding = signal.add(() => {});
+
+signal.dispatch(); // handler will be called
+
+binding.setActive(false);
+
+signal.dispatch(); // handler will not be called
+```

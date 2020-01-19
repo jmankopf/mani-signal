@@ -272,14 +272,26 @@ describe('Signal tests', () => {
         expect(error).toBe(true);
     });
 
+    it('should deactivate and reactivate signal binding', () => {
+        const signal = new Signal();
+        let called = 0;
+        const binding = signal.add(() => {
+            called++;
+        });
+
+        expect(binding.isActive()).toBe(true);
+        signal.dispatch();
+        expect(called).toBe(1);
+
+        binding.setActive(false);
+        expect(binding.isActive()).toBe(false);
+        signal.dispatch();
+        expect(called).toBe(1);
+
+        binding.setActive(true);
+        signal.dispatch();
+        expect(binding.isActive()).toBe(true);
+        expect(called).toBe(2);
+    });
+
 });
-
-const s = new Signal<string>();
-
-s.add(rec);
-
-s.dispatch('word');
-
-function rec(s: string) {
-
-}

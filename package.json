@@ -1,15 +1,16 @@
 {
   "name": "mani-signal",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "A simple and very fast signal class.",
   "scripts": {
     "test": "jest",
     "clear": "rimraf dist",
-    "start": "webpack-dev-server --host 0.0.0.0",
     "build-es5": "tsc -t ES5 --outDir ./dist/es5",
     "build-esnext": "tsc -t ES2017 --outDir ./dist",
     "build": "npm run clear && npm run build-es5 && npm run build-esnext",
-    "test:start": "jest --watch"
+    "test:start": "jest --watch",
+    "do-pre-publish": "npm publish --dry-run",
+    "do-publish": "npm publish"
   },
   "author": "Jan Mankopf",
   "types": "./dist/signal.d.ts",
@@ -37,14 +38,9 @@
   "devDependencies": {
     "@types/jest": "^24.0.13",
     "jest": "^24.8.0",
-    "rimraf": "^2.6.3",
+    "rimraf": "^3.0.0",
     "ts-jest": "^24.0.2",
-    "typescript": "^3.4.5",
-    "ts-loader": "^5.4.3",
-    "webpack": "^4.30.0",
-    "webpack-cli": "^3.3.1",
-    "webpack-dev-server": "^3.3.1",
-    "html-webpack-plugin": "^3.2.0"
+    "typescript": "^3.4.5"
   },
   "dependencies": {}
 }
