@@ -44,7 +44,7 @@ export class Signal<T = unknown> {
 
         let item: InternalBinding = {
             active: true,
-            call
+            call,
         };
 
         if (!this.isDispatching) {
@@ -68,11 +68,9 @@ export class Signal<T = unknown> {
             },
             isActive: () => item.active,
             detach: () => {
-                if (item.isDetached) {
-                    throw Error('Binding already detached');
-                }
+                if (item.isDetached) return;
                 this.removeBinding(item);
-            }
+            },
         };
     }
 
