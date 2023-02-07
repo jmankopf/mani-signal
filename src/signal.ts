@@ -33,6 +33,10 @@ export class Signal<T = unknown> {
     private detachRequests?: DetachRequest;
     private addRequests?: AddRequest;
 
+    await(): Promise<T> {
+        return new Promise(resolve => this.addOnce(resolve));
+    }
+
     add(callback: SignalCallback<T>, context?: unknown, once?: boolean): SignalBinding {
 
         const call = once ? (param: T) => {
