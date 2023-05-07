@@ -10,7 +10,8 @@
     "build": "npm run clear && npm run build-es5 && npm run build-esnext",
     "test:start": "jest --watch",
     "do-pre-publish": "npm publish --dry-run",
-    "do-publish": "npm publish"
+    "do-publish": "npm publish",
+    "version-up": "npm version prerelease"
   },
   "author": "Jan Mankopf",
   "types": "./dist/signal.d.ts",
