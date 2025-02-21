@@ -27,6 +27,20 @@ describe('Signal tests', () => {
         expect(called).toBe(false);
     });
 
+  it('should detach with AbortController', () => {
+    const abortController = new AbortController();
+    const signal = new Signal();
+    let called = false;
+    const binding = signal.add(() => {
+      called = true;
+    }, {abortSignal: abortController.signal});
+
+    abortController.abort();
+    signal.dispatch();
+
+    expect(called).toBe(false);
+  });
+
     it('should detach while dispatching', () => {
         const signal = new Signal();
         let timesCalled = 0;
@@ -64,7 +78,7 @@ describe('Signal tests', () => {
         signal.dispatch();
 
         expect(timesCalled).toBe(3);
-        expect(numErrors).toBe(1);
+      expect(numErrors).toBe(0);
     });
 
     it('should detach all', () => {
@@ -101,7 +115,7 @@ describe('Signal tests', () => {
         signal.dispatch();
 
         expect(timesCalled).toBe(6);
-        expect(error).toBe(true);
+      expect(error).toBe(false);
     });
 
     it('should detach all after dispatching when called during dispatch', () => {
@@ -190,8 +204,8 @@ describe('Signal tests', () => {
             timesCalled = 0;
 
             constructor() {
-                this.signal.add(this.callback, this);
-                this.signal.addOnce(this.callback, this);
+              this.signal.add(this.callback, {context: this});
+              this.signal.addOnce(this.callback, {context: this});
             }
 
             callback() {
@@ -257,7 +271,7 @@ describe('Signal tests', () => {
         expect(timesCalled).toBe(3);
     });
 
-    it('should throw error when detaching multiple times', () => {
+  it('should not throw error when detaching multiple times', () => {
         const signal = new Signal();
 
         let signalBinding = signal.add(() => {
@@ -269,7 +283,7 @@ describe('Signal tests', () => {
         } catch (e) {
             error = true;
         }
-        expect(error).toBe(true);
+    expect(error).toBe(false);
     });
 
     it('should deactivate and reactivate signal binding', () => {
