@@ -1,6 +1,6 @@
 {
   "name": "mani-signal",
-  "version": "1.0.10-0",
+  "version": "1.1.0",
   "description": "A simple and very fast signal class.",
   "scripts": {
     "test": "jest",
@@ -11,7 +11,7 @@
     "test:start": "jest --watch",
     "do-pre-publish": "npm publish --dry-run",
     "do-publish": "npm publish",
-    "version-up": "npm version prerelease"
+    "version-up": "npm version minor"
   },
   "author": "Jan Mankopf",
   "types": "./dist/signal.d.ts",

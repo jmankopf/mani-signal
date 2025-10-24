@@ -22,7 +22,7 @@ interface DetachRequest {
 
 interface AddRequest {
   binding: InternalBinding;
-  next?: DetachRequest;
+  next?: AddRequest;
 }
 const EMPTY_CALL = () => {};
 
@@ -36,12 +36,40 @@ export class Signal<T = unknown> {
   private detachRequests?: DetachRequest;
   private addRequests?: AddRequest;
 
-  await(): Promise<T> {
-    return new Promise(resolve => this.addOnce(resolve));
+  await(abortSignal?: AbortSignal): Promise<T> {
+    if (abortSignal?.aborted) {
+      return Promise.reject(abortSignal.reason ?? new DOMException('Aborted', 'AbortError'));
+    }
+
+    return new Promise<T>((resolve, reject) => {
+      let binding: SignalBinding | undefined;
+
+      const onAbort = () => {
+        if (binding) {
+          binding.detach();
+        }
+        reject(abortSignal!.reason ?? new DOMException('Aborted', 'AbortError'));
+      };
+
+      // wrap resolve to cleanup abort listener
+      const cleanupResolve = (value: T) => {
+        if (abortSignal) {
+          abortSignal.removeEventListener('abort', onAbort);
+        }
+        resolve(value);
+      };
+
+      binding = this.addOnce(cleanupResolve);
+
+      if (abortSignal) {
+        abortSignal.addEventListener('abort', onAbort, {once: true});
+      }
+    });
   }
 
   add(callback: SignalCallback<T>, options: AddSignalOptions = {}): SignalBinding {
     const {context, once, abortSignal} = options;
+
     const call = once ? (param: T) => {
       callback.call(context, param);
       this.removeBinding(item);
@@ -54,19 +82,30 @@ export class Signal<T = unknown> {
       call,
     };
 
-    if (!this.isDispatching) {
-      this.doAdd(item);
-    } else {
-      const addRequest: AddRequest = {binding: item};
-      if (this.addRequests) {
-        addRequest.next = this.addRequests;
-      }
-      this.addRequests = addRequest;
-    }
+    let abortListener: (() => void) | undefined;
 
-    abortSignal?.addEventListener('abort', () => {
-      this.removeBinding(item);
-    });
+    // If abortSignal is already aborted, mark as detached immediately
+    if (abortSignal?.aborted) {
+      item.isDetached = true;
+      item.call = EMPTY_CALL;
+    } else {
+      if (!this.isDispatching) {
+        this.doAdd(item);
+      } else {
+        const addRequest: AddRequest = {binding: item};
+        if (this.addRequests) {
+          addRequest.next = this.addRequests;
+        }
+        this.addRequests = addRequest;
+      }
+
+      if (abortSignal) {
+        abortListener = () => {
+          this.removeBinding(item);
+        };
+        abortSignal.addEventListener('abort', abortListener, {once: true});
+      }
+    }
 
     return {
       setActive: (active: boolean) => {
@@ -81,8 +120,30 @@ export class Signal<T = unknown> {
       detach: () => {
         if (item.isDetached) return;
         this.removeBinding(item);
+        // Clean up abort listener to prevent memory leak
+        if (abortListener && abortSignal) {
+          abortSignal.removeEventListener('abort', abortListener);
+        }
       },
     };
+  }
+
+  async* generator(options: { abortSignal?: AbortSignal } = {}) {
+    const {abortSignal} = options;
+
+    while (true) {
+      if (abortSignal?.aborted) {
+        return;
+      }
+      try {
+        yield await this.await(abortSignal);
+      } catch (error) {
+        if (abortSignal?.aborted) {
+          return;
+        }
+        throw error;
+      }
+    }
   }
 
   addOnce(callback: SignalCallback<T>, options: Omit<AddSignalOptions, 'once'> = {}) {
@@ -202,37 +263,3 @@ export class Signal<T = unknown> {
   }
 }
 
-/**
- * A signal group is a collection of signals that can be disposed all at once.
- * to add a signal to the group, use the add method.
- */
-export const signalGroup = () => {
-  const disposers: SignalBinding[] = [];
-  return {
-    /**
-     * Adds a signal to the group. The signal will be disposed when the group is disposed.
-     * @param signal
-     * @param callback
-     */
-    add: <T extends any>(signal: Signal<T>, callback: (param: T) => void) => {
-      disposers.push(
-        signal.add(param => {
-          callback(param);
-        }),
-      );
-    },
-    /**
-     * Disposes all signals in the group.
-     */
-    dispose: () => {
-      disposers.forEach(d => d.detach());
-    },
-    /**
-     * Sets the active state of all signals in the group.
-     * @param active
-     */
-    setActive: (active: boolean) => {
-      disposers.forEach(d => d.setActive(active));
-    },
-  };
-};
