@@ -1,6 +1,6 @@
 {
   "name": "mani-signal",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "A simple and very fast signal class.",
   "scripts": {
     "test": "jest",
