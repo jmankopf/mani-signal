@@ -11,7 +11,8 @@
     "test:start": "jest --watch",
     "do-pre-publish": "npm publish --dry-run",
     "do-publish": "npm publish",
-    "version-up": "npm version minor"
+    "version-up-patch": "npm version patch",
+    "version-up-minor": "npm version minor"
   },
   "author": "Jan Mankopf",
   "types": "./dist/signal.d.ts",
